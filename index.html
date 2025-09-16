@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School Navigation</title>
+    <style>
+        /* Reset default browser styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Main body styling with gradient background */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* Main container for centering content */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header section styling */
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px 0;
+        }
+
+        /* Main title with custom Google Font */
+        .header h1 {
+            font-family: 'Inter', sans-serif;
+            font-size: 3rem;
+            color: #2c3e50;
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: -0.02em;
+        }
+
+        /* Breadcrumb navigation styling */
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        /* Breadcrumb item hover effects */
+        .breadcrumb-item {
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .breadcrumb-item:hover {
+            color: #2c3e50;
+        }
+
+        /* Breadcrumb separator styling */
+        .breadcrumb-separator {
+            margin: 0 10px;
+            color: #ccc;
+        }
+
+        /* Grid layout for cards */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        /* Main card styling with animations */
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Animated top border effect for cards */
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #2c3e50, transparent);
+            transition: left 0.5s ease;
+        }
+
+        /* Card hover effects - lift and shadow */
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.18);
+            border-color: #2c3e50;
+        }
+
+        /* Card title styling */
+        .card h3 {
+            font-size: 1.3rem;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Card description text */
+        .card p {
+            color: #666;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        /* Back button styling */
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            background: #2c3e50;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            text-decoration: none;
+        }
+
+        /* Back button hover effects */
+        .back-btn:hover {
+            background: #34495e;
+            transform: translateX(-3px);
+        }
+
+        /* Back button arrow icon */
+        .back-btn::before {
+            content: '←';
+            margin-right: 8px;
+            font-size: 1.2rem;
+        }
+
+        /* Utility class to hide elements */
+        .hidden {
+            display: none;
+        }
+
+        /* Fade in animation class */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        /* Keyframe animation for fade in effect */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Special styling for topic cards */
+        .topic-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        /* Topic card title styling */
+        .topic-card h3 {
+            color: white;
+        }
+
+        /* Topic card description styling */
+        .topic-card p {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        /* Topic card enhanced hover effect */
+        .topic-card:hover {
+            transform: translateY(-5px) scale(1.02);
+        }
+
+        /* Responsive design for mobile devices */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.2rem;
+            }
+            
+            .grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 id="page-title">Study Material</h1>
+            <div class="breadcrumb" id="breadcrumb">
+                <span class="breadcrumb-item" onclick="showSubjects()">Subjects</span>
+            </div>
+        </div>
+
+        <button class="back-btn hidden" id="back-btn" onclick="goBack()">Back</button>
+
+        <div class="grid" id="content-grid"></div>
+    </div>
+
+    <script>
+        // Data structure containing all subjects, units, and topics
+        const subjects = {
+            'AP Human Geography': {
+                description: 'How humans impact their environment.',
+                units: {
+                    'This is Geography': {
+                        description: 'Chapter One',
+                        topics: {
+                            'Quizlet Study Guide': {
+                                description: '',
+                                link: 'https://quizlet.com/study-guides/this-is-geography-e1e40ef0-aa1a-4be0-9508-0977985151ed'
+                            },
+                            'Quizlet Flashcards': {
+                                description: '',
+                                link: 'https://quizlet.com/936878545/this-is-geography-flash-cards?funnelUUID=49626e3a-0093-41f2-a5d6-6b8d3440bfec'
+                            },
+                            'Blooket': {
+                                description: '',
+                                link: 'https://dashboard.blooket.com/set/66d22740ac03cce45fae4a8f'
+                            }
+                        }
+                    },
+                    'Population and Health': {
+                        description: 'Chapter Two',
+                        topics: {
+                            'Quizlet Study Guide': {
+                                description: '',
+                                link: 'https://quizlet.com/study-guides/population-and-health-12f015db-2528-4c70-9204-d503e7c50f20'
+                            },
+                            'Quizlet Flashcards': {
+                                description: '',
+                                link: 'https://quizlet.com/936879222/population-and-health-flash-cards'
+                            },
+                            'Blooket': {
+                                description: '',
+                                link: 'https://dashboard.blooket.com/set/66d228acf0e9d7833fb5a454'
+                            }
+                        }
+                    },
+                    'Religion': {
+                        description: 'Chapter Six',
+                        topics: {
+                            'Quizlet Study Guide': {
+                                description: '',
+                                link: 'https://quizlet.com/study-guides/magic-note-f99a23c8-0c81-46d3-a7ba-86cf1c68336c?i=5y8nds&x=13qt'
+                            },
+                            'Quizlet Flashcards': {
+                                description: '',
+                                link: 'https://quizlet.com/958925477/religions-flash-cards/?i=5y8nds&x=1jqt'
+                            },
+                            'Blooket': {
+                                description: '',
+                                link: 'https://dashboard.blooket.com/set/67119822c33e89bfae7ab2fc'
+                            }
+                        }
+                    },
+                    'Ethnicities': {
+                        description: 'Chapter Seven',
+                        topics: {
+                            'Quizlet Study Guide': {
+                                description: '',
+                                link: 'https://quizlet.com/study-guides/this-is-geography-e1e40ef0-aa1a-4be0-9508-0977985151ed'
+                            },
+                            'Quizlet Flashcards': {
+                                description: '',
+                                link: 'https://quizlet.com/936878545/this-is-geography-flash-cards?funnelUUID=49626e3a-0093-41f2-a5d6-6b8d3440bfec'
+                            },
+                            'Blooket': {
+                                description: '',
+                                link: 'https://dashboard.blooket.com/set/66d22740ac03cce45fae4a8f'
+                            }
+                        }
+                    }
+                }
+            },
+            'AP Environmental Science': {
+                description: 'How the environment interacts with us and our neighbors.',
+                units: {
+                    'Biogeochemical Cycles': {
+                        description: 'Chapter One',
+                        topics: {
+                            'Quizlet Study Guide': {
+                                description: '',
+                                link: 'https://quizlet.com/study-guides/biogeochemical-cycles-overview-15da79d5-96b5-42e7-a57b-36d3b5a12f04?funnelUUID=48ce4054-b8c5-48cc-a9ce-0c8a489f0f2a'
+                            },
+                            'Quizlet Flashcards': {
+                                description: '',
+                                link: 'https://quizlet.com/934525186/biogeochemical-cycles-overview-flash-cards/?funnelUUID=feea2965-576f-47dc-93f2-dc61d9586e90'
+                            },
+                            'Blooket': {
+                                description: '',
+                                link: 'https://dashboard.blooket.com/set/67119b089295295b81e180d3'
+                            }
+                        }
+                    },
+                    'Terrestrial and Aquatic Biomes': {
+                        description: 'Chapter Two',
+                        topics: {
+                            'Quizlet Study Guide': {
+                                description: '',
+                                link: 'https://quizlet.com/study-guides/terrestrial-and-aquatic-biomes-overview-b144007f-c812-489d-9401-8117f6ab392a?i=5y8nds&x=13qt'
+                            },
+                            'Quizlet Flashcards': {
+                                description: '',
+                                link: 'https://quizlet.com/935936940/terrestrial-and-aquatic-biomes-overview-flash-cards/?i=5y8nds&x=1jqt'
+                            },
+                            'Blooket': {
+                                description: '',
+                                link: 'https://dashboard.blooket.com/set/66ce2a694b4b5198942a19c9'
+                            }
+                        }
+                    },
+                    'The Movement of Energy': {
+                        description: 'Chapter Three',
+                        topics: {
+                            'Quizlet Study Guide': {
+                                description: '',
+                                link: 'https://quizlet.com/study-guides/the-movement-of-energy-16335c94-0781-4be2-9cdb-e50beee37b2e?funnelUUID=3a125217-f2c5-4e80-a739-15033ec9e267'
+                            },
+                            'Quizlet Flashcards': {
+                                description: '',
+                                link: 'https://quizlet.com/943844220/the-movement-of-energy-flash-cards/?funnelUUID=50a2f774-189f-42b0-a72a-4d3aee2f345c'
+                            },
+                            'Blooket': {
+                                description: '',
+                                link: 'https://dashboard.blooket.com/set/66e9c1d2cb279349b08963c0'
+                            }
+                        }
+                    },
+                    'Population and Community Ecology': {
+                        description: 'Chapter ???',
+                        topics: {
+                            'Quizlet Study Guide': {
+                                description: '',
+                                link: 'https://quizlet.com/study-guides/magic-note-eb5903e2-34b8-463f-8a23-3081c6addc5c?i=5y8nds&x=13qt'
+                            },
+                            'Quizlet Flashcards': {
+                                description: '',
+                                link: 'https://quizlet.com/966032299/population-and-community-ecology-flash-cards/?i=5y8nds&x=1jqt'
+                            },
+                            'Blooket': {
+                                description: '',
+                                link: 'https://dashboard.blooket.com/set/67279444cf8bd33be972ab4d'
+                            }
+                        }
+                    }
+                }
+            },
+            'AP Psychology': {
+                description: 'The human mind and how it acts. (Elijah Parker) ',
+                units: {
+                    'Unit One': {
+                        description: '',
+                        topics: {
+                            'Quizlet Flashcards': {
+                                description: '',
+                                link: 'https://quizlet.com/1065776218/ap-psych-vocab-flash-cards/?i=4jtahj&x=1jqt'
+                            }
+                        }
+                    },
+                    'Unit Two': {
+                        description: '',
+                        topics: {
+                            'Quizlet Flashcards': {
+                                description: '',
+                                link: 'https://quizlet.com/1070942403/ap-psych-unit-2-vocab-flash-cards/?i=4jtahj&x=1jqt'
+                            }
+                        }
+                    },
+                    'Unit Three': {
+                        description: '',
+                        topics: {
+                            'Quizlet Flashcards': {
+                                description: '',
+                                link: 'https://quizlet.com/1074542898/ap-psych-unit-3-vocab-flash-cards/?i=4jtahj&x=1jqt'
+                            }
+                        }
+                    }
+                }
+            },
+            "Can't Find What You're Looking For?" : {
+                description: 'or Missing Information.',
+                units: {
+                    'We Need your Help': {
+                        description: 'Help by contacting me and sending missing information or new study sets.',
+                        topics: {
+                            'Contact NOW': {
+                                description: '',
+                                link: 'https://mail.google.com/mail/u/0/?tf=cm&fs=1&to=jwolff@aquinashigh.org&hl=en'
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // State variables to track current navigation position
+        let currentView = 'subjects';
+        let currentSubject = null;
+        let currentUnit = null;
+
+        /**
+         * Display the main subjects page
+         * Resets navigation state and shows all available subjects
+         */
+        function showSubjects() {
+            currentView = 'subjects';
+            currentSubject = null;
+            currentUnit = null;
+            
+            // Update page title and breadcrumb
+            document.getElementById('page-title').textContent = 'School Subjects';
+            document.getElementById('breadcrumb').innerHTML = '<span class="breadcrumb-item">Subjects</span>';
+            document.getElementById('back-btn').classList.add('hidden');
+            
+            // Clear grid and add fade animation
+            const grid = document.getElementById('content-grid');
+            grid.innerHTML = '';
+            grid.className = 'grid fade-in';
+            
+            // Create cards for each subject
+            Object.keys(subjects).forEach(subject => {
+                const card = createCard(
+                    subject,
+                    subjects[subject].description,
+                    () => showUnits(subject)
+                );
+                grid.appendChild(card);
+            });
+        }
+
+        /**
+         * Display units for a specific subject
+         * @param {string} subject - The subject name to show units for
+         */
+        function showUnits(subject) {
+            currentView = 'units';
+            currentSubject = subject;
+            currentUnit = null;
+            
+            // Update page title and breadcrumb navigation
+            document.getElementById('page-title').textContent = `${subject} - Units`;
+            document.getElementById('breadcrumb').innerHTML = `
+                <span class="breadcrumb-item" onclick="showSubjects()">Subjects</span>
+                <span class="breadcrumb-separator">></span>
+                <span class="breadcrumb-item">${subject}</span>
+            `;
+            document.getElementById('back-btn').classList.remove('hidden');
+            
+            // Clear grid and add fade animation
+            const grid = document.getElementById('content-grid');
+            grid.innerHTML = '';
+            grid.className = 'grid fade-in';
+            
+            // Create cards for each unit in the subject
+            Object.keys(subjects[subject].units).forEach(unit => {
+                const unitData = subjects[subject].units[unit];
+                const card = createCard(
+                    unit,
+                    unitData.description,
+                    () => showTopics(subject, unit)
+                );
+                grid.appendChild(card);
+            });
+        }
+
+        /**
+         * Display topics for a specific unit within a subject
+         * @param {string} subject - The subject name
+         * @param {string} unit - The unit name to show topics for
+         */
+        function showTopics(subject, unit) {
+            currentView = 'topics';
+            currentSubject = subject;
+            currentUnit = unit;
+            
+            // Update page title and breadcrumb navigation
+            document.getElementById('page-title').textContent = `${unit} - Topics`;
+            document.getElementById('breadcrumb').innerHTML = `
+                <span class="breadcrumb-item" onclick="showSubjects()">Subjects</span>
+                <span class="breadcrumb-separator">></span>
+                <span class="breadcrumb-item" onclick="showUnits('${subject}')">${subject}</span>
+                <span class="breadcrumb-separator">></span>
+                <span class="breadcrumb-item">${unit}</span>
+            `;
+            
+            // Clear grid and add fade animation
+            const grid = document.getElementById('content-grid');
+            grid.innerHTML = '';
+            grid.className = 'grid fade-in';
+            
+            // Get topics object and create cards with links
+            const topics = subjects[subject].units[unit].topics;
+            Object.keys(topics).forEach((topicName) => {
+                const topicData = topics[topicName];
+                const card = createTopicCard(
+                    topicName,
+                    topicData.description,
+                    () => {
+                        // Open the link in a new tab/window
+                        if (topicData.link) {
+                            window.open(topicData.link, '_blank');
+                        } else {
+                            alert(`No link available for ${topicName}`);
+                        }
+                    }
+                );
+                grid.appendChild(card);
+            });
+        }
+
+        /**
+         * Create a standard card element for subjects and units
+         * @param {string} title - The card title text
+         * @param {string} description - The card description text
+         * @param {function} onClick - Function to execute when card is clicked
+         * @returns {HTMLElement} - The created card element
+         */
+        function createCard(title, description, onClick) {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.onclick = onClick;
+            
+            card.innerHTML = `
+                <h3>${title}</h3>
+                <p>${description}</p>
+            `;
+            
+            return card;
+        }
+
+        /**
+         * Create a special topic card with gradient styling
+         * @param {string} title - The topic title text
+         * @param {string} description - The topic description text
+         * @param {function} onClick - Function to execute when card is clicked
+         * @returns {HTMLElement} - The created topic card element
+         */
+        function createTopicCard(title, description, onClick) {
+            const card = document.createElement('div');
+            card.className = 'card topic-card';
+            card.onclick = onClick;
+            
+            card.innerHTML = `
+                <h3>${title}</h3>
+                <p>${description}</p>
+            `;
+            
+            return card;
+        }
+
+        /**
+         * Navigate back one level in the hierarchy
+         * Handles navigation from topics to units, or units to subjects
+         */
+        function goBack() {
+            if (currentView === 'topics') {
+                showUnits(currentSubject);
+            } else if (currentView === 'units') {
+                showSubjects();
+            }
+        }
+
+        // Initialize the application by showing the subjects page
+        showSubjects();
+    </script>
+</body>
+</html>
